@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.validator.UserValidator;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,9 +26,9 @@ public class UserController {
     // создание пользователя
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        log.info("Создание нового пользователя: {}", user);
-        UserValidator.validate(user);
         user.setId(getNextId());
+        log.info("Создание нового пользователя: {}", user);
+        checkAndSetUserName(user);
         users.put(user.getId(), user);
         return user;
     }
@@ -42,13 +41,17 @@ public class UserController {
             throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
         }
         log.info("Обновление пользователя: {}", newUser);
+        checkAndSetUserName(newUser);
         User existingUser = users.get(newUser.getId());
-        UserValidator.validate(newUser);
-        existingUser.setName(newUser.getName());
-        existingUser.setEmail(newUser.getEmail());
-        existingUser.setLogin(newUser.getLogin());
-        existingUser.setBirthday(newUser.getBirthday());
-        return existingUser;
+        users.put(existingUser.getId(), newUser);
+        return newUser;
+    }
+
+    private void checkAndSetUserName(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            log.error("Имя NULL, в качестве имени используется login, user_id = {}", user.getId());
+            user.setName(user.getLogin());
+        }
     }
 
     private long getNextId() {
