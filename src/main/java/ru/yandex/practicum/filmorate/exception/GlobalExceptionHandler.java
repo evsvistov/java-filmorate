@@ -17,40 +17,34 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             log.error("Ошибка валидации поля {}: {}", error.getField(), error.getDefaultMessage());
             errors.put(error.getField(), error.getDefaultMessage());
         });
-        return buildResponseEntity(errors, HttpStatus.BAD_REQUEST);
+        return buildResponseEntity(new ErrorResponse("Validation error", errors.toString()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Map<String, String>> handleValidationException(ValidationException ex) {
+    public ResponseEntity<ErrorResponse> handleValidationException(ValidationException ex) {
         log.error("Ошибка валидации: {}", ex.getMessage());
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("message", ex.getMessage());
-        return buildResponseEntity(errorResponse, HttpStatus.BAD_REQUEST);
+        return buildResponseEntity(new ErrorResponse("Validation error", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFoundException(NotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {
         log.error("Ошибка: {}", ex.getMessage());
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("message", ex.getMessage());
-        return buildResponseEntity(errorResponse, HttpStatus.NOT_FOUND);
+        return buildResponseEntity(new ErrorResponse("Not Found", ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleAllExceptions(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
         log.error("Внутренняя ошибка сервера: {}", ex.getMessage());
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("message", "Внутренняя ошибка сервера");
-        return buildResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return buildResponseEntity(new ErrorResponse("Internal Server Error", ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private ResponseEntity<Map<String, String>> buildResponseEntity(Map<String, String> errorResponse, HttpStatus status) {
+    private ResponseEntity<ErrorResponse> buildResponseEntity(ErrorResponse errorResponse, HttpStatus status) {
         return new ResponseEntity<>(errorResponse, status);
     }
 }
