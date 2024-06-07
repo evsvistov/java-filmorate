@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -65,9 +64,9 @@ public class FilmService {
     // добавление лайка
     public boolean addLike(Long filmId, Long userId) {
         log.info("Добавление лайка от пользователя {} фильму {}", userId, filmId);
-        Film film = filmStorage.getFilmById(filmId)
+        filmStorage.getFilmById(filmId)
                 .orElseThrow(() -> new NotFoundException("Фильм с id = " + filmId + " не найден"));
-        User user = userStorage.getUserById(userId)
+        userStorage.getUserById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
         return likes.computeIfAbsent(filmId, k -> new HashSet<>()).add(userId);
     }
@@ -75,9 +74,9 @@ public class FilmService {
     // удаление лайка
     public boolean removeLike(Long filmId, Long userId) {
         log.info("Удаление лайка от пользователя {} фильму {}", userId, filmId);
-        Film film = filmStorage.getFilmById(filmId)
+        filmStorage.getFilmById(filmId)
                 .orElseThrow(() -> new NotFoundException("Фильм с id = " + filmId + " не найден"));
-        User user = userStorage.getUserById(userId)
+        userStorage.getUserById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
         if (likes.containsKey(filmId)) {
             boolean removed = likes.get(filmId).remove(userId);
