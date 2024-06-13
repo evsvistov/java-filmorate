@@ -1,2 +1,5 @@
 # java-filmorate
-Template repository for Filmorate project.
+<picture>
+  <source media= srcset="er_diagram.png">
+  <img alt="ER-Diagram filmorate" src="docs/er_diagram.png">
+</picture>
