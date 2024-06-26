@@ -43,4 +43,6 @@ INSERT INTO genre (name)
 SELECT 'Боевик'
 WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Боевик');
 
+INSERT INTO users (email, login, name, birthday) VALUES ('Valid@example.com', 'ValidLogin', 'Valid Name', '1999-12-31');
+
 COMMIT;
