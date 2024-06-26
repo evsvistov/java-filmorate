@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
+
 import org.junit.jupiter.params.provider.MethodSource;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -13,10 +14,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
+
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.practicum.filmorate.model.User;
 
 @SpringBootTest
+@ActiveProfiles("test")
 public class UserValidationTest {
     private static Validator validator;
 
