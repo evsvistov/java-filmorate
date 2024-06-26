@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.film;
+package ru.yandex.practicum.filmorate.dao;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -16,4 +16,5 @@ public interface FilmStorage {
     boolean delete(Long filmId);
 
     Optional<Film> getFilmById(Long id);
+
 }

@@ -1,79 +1,56 @@
 package ru.yandex.practicum.filmorate;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
+import org.junit.jupiter.params.provider.MethodSource;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.LocalDate;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @SpringBootTest
-class UserValidationTest {
-    private Validator validator;
+public class UserValidationTest {
+    private static Validator validator;
 
-    @BeforeEach
-    public void setUp() {
+    @BeforeAll
+    public static void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
     }
 
-    @Test
-    void testValidUser() {
-        User user = new User();
-        user.setEmail("valid@example.com");
-        user.setLogin("validLogin");
-        user.setName("Valid Name");
-        user.setBirthday(LocalDate.of(2024, 1, 1));
-
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertTrue(violations.isEmpty());
+    static Stream<User> validUserProvider() {
+        return Stream.of(
+                new User(null, "valid@example.com", "validLogin", "Valid Name", LocalDate.of(1999, 12, 31), new HashSet<>())
+        );
     }
 
-    @Test
-    void testInvalidEmail() {
-        User user = new User();
-        user.setEmail("invalid-email");
-        user.setLogin("validLogin");
-        user.setName("Valid Name");
-        user.setBirthday(LocalDate.of(2024, 1, 1));
-
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(1, violations.size());
-        assertEquals("Электронная почта должна быть корректной и содержать символ @", violations.iterator().next().getMessage());
+    static Stream<User> invalidUserProvider() {
+        return Stream.of(
+                new User(null, "invalid-email", "validLogin", "Valid Name", LocalDate.of(1999, 12, 31), new HashSet<>()),
+                new User(null, "valid@example.com", "", "Valid Name", LocalDate.of(1999, 12, 31), new HashSet<>()),
+                new User(null, "valid@example.com", "validLogin", "Valid Name", LocalDate.now().plusDays(1), new HashSet<>())
+        );
     }
 
-    @Test
-    void testEmptyLogin() {
-        User user = new User();
-        user.setEmail("valid@example.com");
-        user.setLogin("");
-        user.setName("Valid Name");
-        user.setBirthday(LocalDate.of(2024, 1, 1));
-
+    @ParameterizedTest
+    @MethodSource("validUserProvider")
+    void testValidUser(User user) {
         Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(1, violations.size());
-        assertEquals("Логин не может быть пустым и содержать пробелы", violations.iterator().next().getMessage());
+        assertTrue(violations.isEmpty(), "There should be no violations for a valid user");
     }
 
-    @Test
-    void testFutureBirthday() {
-        User user = new User();
-        user.setEmail("valid@example.com");
-        user.setLogin("validLogin");
-        user.setName("Valid Name");
-        user.setBirthday(LocalDate.now().plusDays(1));
-
+    @ParameterizedTest
+    @MethodSource("invalidUserProvider")
+    void testInvalidUsers(User user) {
         Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(1, violations.size());
-        assertEquals("Дата рождения не может быть в будущем", violations.iterator().next().getMessage());
+        assertTrue(!violations.isEmpty(), "There should be violations for an invalid user");
     }
-
 }

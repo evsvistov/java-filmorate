@@ -1,10 +1,11 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,7 +16,7 @@ public class UserService {
 
     private final UserStorage userStorage;
 
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
@@ -53,32 +54,28 @@ public class UserService {
     // добавление друга
     public void addFriend(Long userId, Long friendId) {
         log.info("Пользователь с id = {} добавляет в друзья пользователя с id = {}", userId, friendId);
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
+        userStorage.addFriend(userId, friendId);
     }
 
     // удаление друга
     public void removeFriend(Long userId, Long friendId) {
         log.info("Пользователь с id = {} удаляет из друзей пользователя с id = {}", userId, friendId);
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
+        userStorage.removeFriend(userId, friendId);
     }
 
-    // вывод списка общих друзей
-    public List<User> getCommonFriends(Long userId, Long otherUserId) {
-        log.info("Поиск общих друзей между пользователями с id = {} и id = {}", userId, otherUserId);
-        User user = getUserById(userId);
-        User otherUser = getUserById(otherUserId);
-
-        Set<Long> commonFriendsIds = new HashSet<>(user.getFriends());
-        commonFriendsIds.retainAll(otherUser.getFriends());
-
-        return commonFriendsIds.stream()
+    public Set<User> getFriends(Long userId) {
+        Set<Long> friendIds = userStorage.getFriends(userId);
+        return friendIds.stream()
                 .map(this::getUserById)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
+
+    public Set<User> getCommonFriends(Long userId, Long otherUserId) {
+        Set<Long> commonFriendIds = userStorage.getCommonFriends(userId, otherUserId);
+        return commonFriendIds.stream()
+                .map(this::getUserById)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
 }
