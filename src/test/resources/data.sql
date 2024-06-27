@@ -43,6 +43,12 @@ INSERT INTO genre (name)
 SELECT 'Боевик'
 WHERE NOT EXISTS (SELECT 1 FROM genre WHERE name = 'Боевик');
 
-INSERT INTO users (email, login, name, birthday) VALUES ('Valid@example.com', 'ValidLogin', 'Valid Name', '1999-12-31');
+INSERT INTO users (email, login, name, birthday)
+select
+    'Valid@example.com' as email,
+    'ValidLogin' as login,
+    'Valid Name' as name,
+    '1999-12-31' as birthday
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'Valid@example.com');
 
 COMMIT;

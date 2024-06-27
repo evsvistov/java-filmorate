@@ -48,9 +48,7 @@ public class FilmController {
             return new ResponseEntity<>(createdFilm, HttpStatus.CREATED);
         } catch (ResponseStatusException ex) {
             return ResponseEntity.status(ex.getStatusCode()).body(Map.of("error", ex.getReason()));
-        } catch (MpaNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
-        } catch (GenreNotFoundException ex) {
+        } catch (MpaNotFoundException | GenreNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Internal Server Error"));
