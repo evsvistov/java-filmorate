@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 /**
  * Film.
@@ -33,4 +35,20 @@ public class Film {
         return !releaseDate.isBefore(earliestReleaseDate);
     }
 
+    @JsonProperty("mpa")
+    private MpaRating mpaRatingId;
+
+    @JsonProperty("genres")
+    private Set<Genre> genreIds;
+
+    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, MpaRating mpaRatingId,
+                Set<Genre> genreIds) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpaRatingId = mpaRatingId;
+        this.genreIds = genreIds;
+    }
 }
